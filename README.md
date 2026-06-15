@@ -1,4 +1,4 @@
-# supertails-wiki — `wiki-creator`
+# wiki-creator
 
 **Interview anyone about how they work, then generate them a personalized knowledge wiki —
 and a custom skill to run it.**
@@ -61,8 +61,8 @@ link back to the decision or action they came from, so you can trace **decision 
 A personal-scope Claude Code skill — copy it into your skills directory:
 
 ```bash
-git clone https://github.com/<you>/supertails-wiki
-cp -r supertails-wiki/skills/wiki-creator ~/.claude/skills/
+git clone https://github.com/<you>/wiki-creator
+cp -r wiki-creator/skills/wiki-creator ~/.claude/skills/
 ```
 
 Then, in Claude Code:
@@ -84,7 +84,7 @@ Then, in Claude Code:
 ## Repo layout
 
 ```
-supertails-wiki/
+wiki-creator/
 ├── README.md  LICENSE  .gitignore
 └── skills/wiki-creator/
     ├── SKILL.md              # the generator (interview + build pipeline)
