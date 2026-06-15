@@ -1,0 +1,23 @@
+{
+  "skill_name": "wiki-creator",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I want to set up a wiki to organize my work — meetings, decisions, and the people I manage. Can you help me create one?",
+      "expected_output": "Triggers wiki-creator. Begins a plain-language interview about how the user works, matches them to an archetype, proposes a personalized OKF structure, and only scaffolds after confirmation. Generates a bespoke /<wiki-name> operating skill.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Build me a personal knowledge base / second brain for my projects and my 1:1s.",
+      "expected_output": "Triggers wiki-creator. Interviews, proposes a structure with people/ (profiles + per-topic conversations) and projects/ (with optional sub-projects), scaffolds the vault + the operating skill, and wires qmd search if available.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "I keep losing track of what we decide in founder meetings. I want a system that captures meetings and pulls out the action items and decisions automatically.",
+      "expected_output": "Triggers wiki-creator. Designs a wiki whose meeting flow fans out into actionables/decisions (and patterns/results), each backlinking to the meeting and participants. Generates an operating skill with a `meeting` operation.",
+      "files": []
+    }
+  ]
+}
