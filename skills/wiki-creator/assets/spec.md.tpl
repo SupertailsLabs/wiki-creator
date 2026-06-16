@@ -49,20 +49,9 @@ better. Unknown fields are always preserved.
 
 {{LINK_STYLE_DESC}}
 
-## The distillation flow (the heart of this wiki)
+## How this wiki is fed (the heart of it)
 
-Raw material — a meeting, a 1:1, a pasted chat transcript — is captured once, then the
-useful parts are pulled out into short, linkable pages:
-
-- **Meeting / conversation** → kept in `meetings/` (or under a person in
-  `people/<name>/conversations/`). Transcript handling here is **{{TRANSCRIPT_MODE}}**.
-- From each, fan out to the buckets — {{BUCKETS}} — one page per item, each linking back to
-  its source via `source:` and to the people involved via `people:`.
-- **Results** close the loop: a result links back to the decision or actionable it came
-  from (`follows_up:`), so you can trace decision → outcome.
-
-One meeting typically creates or updates several cross-linked pages. You never file things
-by hand — the `{{WIKI_NAME}}` skill does the fan-out.
+{{FLOW_DESC}}
 
 ## Naming & dates
 

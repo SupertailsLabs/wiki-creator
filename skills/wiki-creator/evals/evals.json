@@ -4,19 +4,31 @@
     {
       "id": 1,
       "prompt": "I want to set up a wiki to organize my work — meetings, decisions, and the people I manage. Can you help me create one?",
-      "expected_output": "Triggers wiki-creator. Begins a plain-language interview about how the user works, matches them to an archetype, proposes a personalized OKF structure, and only scaffolds after confirmation. Generates a bespoke /<wiki-name> operating skill.",
+      "expected_output": "Triggers wiki-creator. Round 0 settles mode=work. Runs a plain-language interview about how the user works, matches them to a work archetype (1–4), proposes a personalized OKF structure, and only scaffolds after confirmation. Generates a bespoke /<wiki-name> operating skill from operating-skill.md.tpl with a meeting flow.",
       "files": []
     },
     {
       "id": 2,
-      "prompt": "Build me a personal knowledge base / second brain for my projects and my 1:1s.",
-      "expected_output": "Triggers wiki-creator. Interviews, proposes a structure with people/ (profiles + per-topic conversations) and projects/ (with optional sub-projects), scaffolds the vault + the operating skill, and wires qmd search if available.",
+      "prompt": "I read a lot of articles and books and keep forgetting what I learned. Help me build a personal second brain to capture what I read plus my own notes, and connect ideas over time.",
+      "expected_output": "Triggers wiki-creator. Round 0 settles mode=personal. Proposes a second-brain structure (sources with highlights+takeaway, atomic idea-notes, topic hubs; optional journal), defaults git=false, offers Obsidian wikilinks readily. Scaffolds the vault + an operating skill from operating-skill-personal.md.tpl with save/note/query ops; the seeded example is a source → idea-note → topic, not a meeting.",
       "files": []
     },
     {
       "id": 3,
       "prompt": "I keep losing track of what we decide in founder meetings. I want a system that captures meetings and pulls out the action items and decisions automatically.",
-      "expected_output": "Triggers wiki-creator. Designs a wiki whose meeting flow fans out into actionables/decisions (and patterns/results), each backlinking to the meeting and participants. Generates an operating skill with a `meeting` operation.",
+      "expected_output": "Triggers wiki-creator (mode=work). Designs a wiki whose meeting flow fans out into actionables/decisions (and patterns/results), each backlinking to the meeting and participants. Generates an operating skill with a `meeting` operation.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "I want a wiki to document this codebase — the architecture decisions, the gotchas we keep hitting, and the key concepts — and I'd like it to live inside the repo.",
+      "expected_output": "Triggers wiki-creator. Round 0 settles mode=project (technical kind). Proposes a single-project shape: overview.md anchor at the vault root with buckets at root (decisions, patterns, concepts, learnings, references), no projects/ wrapper. Defaults vault_root inside the repo (./docs/wiki) and git=true. Generates an operating skill from operating-skill-project.md.tpl with a `log` operation that keeps the overview current.",
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "Help me set up a wiki to plan my wedding — I want to track decisions, the vendors, the budget, and the timeline in one place.",
+      "expected_output": "Triggers wiki-creator. Round 0 settles mode=project (initiative/event kind). Proposes a single-project shape with overview.md plus buckets chosen for an event (decisions, tasks, milestones for the timeline, people for vendors, references). Defaults git=false (personal). Generates an operating skill from operating-skill-project.md.tpl.",
       "files": []
     }
   ]

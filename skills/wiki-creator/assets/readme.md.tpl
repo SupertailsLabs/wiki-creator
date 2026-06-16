@@ -1,26 +1,11 @@
 # {{WIKI_TITLE}}
 
-Welcome, {{OWNER}}! This is your personal work wiki. You don't have to organize anything by
+Welcome, {{OWNER}}! {{WIKI_KIND_SENTENCE}} You don't have to organize anything by
 hand — just talk to the **`{{WIKI_NAME}}`** assistant and it files things for you.
 
 ## What you can say
 
-- **Capture a meeting** — paste or describe it:
-  > `/{{WIKI_NAME}} meeting` … then paste the notes or transcript
-
-  It writes a meeting note and pulls out {{BUCKETS}} automatically.
-
-- **Log a 1:1** with someone:
-  > `/{{WIKI_NAME}} person Asha` … then describe what you discussed
-
-- **Ask your wiki anything**:
-  > `/{{WIKI_NAME}} query what did we decide about pricing?`
-
-- **Add a project or person**:
-  > `/{{WIKI_NAME}} init project Q3 Launch`
-
-- **Tidy up**:
-  > `/{{WIKI_NAME}} lint`
+{{WHAT_YOU_CAN_SAY}}
 
 ## Where things live
 
