@@ -90,7 +90,7 @@ present) so the next search is current.
 
 | Invocation | Operation |
 |---|---|
-| `/{{WIKI_NAME}}` or `/{{WIKI_NAME}} ingest` | **Ingest** — distill the current conversation |
+| `/{{WIKI_NAME}}` or `/{{WIKI_NAME}} ingest` | **Ingest** — distill the conversation (and archive/refresh superseded pages) |
 | `/{{WIKI_NAME}} save [link/quote/notes]` | **Save** — capture a source you read/watched |
 | `/{{WIKI_NAME}} note [thought]` | **Note** — capture one idea in your own words |
 | `/{{WIKI_NAME}} journal [entry]` | **Journal** — today's entry [ONLY IF journal/] |
@@ -109,8 +109,11 @@ Capture something {{OWNER}} read, watched, or listened to as a **source** page.
    "Paste the link, a few quotes, or just tell me what it was about."
 2. **Identify** a short title, a kebab-case slug, the author and `kind` (article / book /
    video / podcast / paper / thread), and the URL if there is one.
-3. **Dedup first** (qmd `search`/`vsearch`, or grep). If a page on the same source exists,
-   UPDATE it instead of creating a duplicate.
+3. **Dedup, then classify** (qmd `search`/`vsearch`, or grep): **NEW** source (no match →
+   create), **UPDATE** (you already saved it → append an `## Update — <date>` section and bump
+   `timestamp`), or **ARCHIVE** (this replaces one you'd treated as current → archive the old
+   one per **Archival** below). Idea-notes you spin off follow the same rule. Never duplicate;
+   never delete.
 4. **Write the source page** at `"$VAULT_ROOT/sources/<slug>.md"` from
    `templates/source.md`. How much of the original to keep is **{{TRANSCRIPT_MODE}}**:
    - `distilled-only` → just the **takeaway** (one or two lines, in {{OWNER}}'s words) + a
@@ -122,7 +125,8 @@ Capture something {{OWNER}} read, watched, or listened to as a **source** page.
    needs one.
 6. **Link to topics.** Connect the source (and any idea) to the relevant **topic** hub[IF topics/];
    create the topic if it doesn't exist yet (see Topic)[/IF].
-7. **Update indexes & logs**; **refresh search** (`qmd update && qmd embed`).
+7. **Update indexes & logs** (move any archived page's bullet to its `index.md`'s `## Archived`
+   section; note UPDATEs/ARCHIVEs in `log.md`); **refresh search** (`qmd update && qmd embed`).
 8. **Report** plainly: "Saved *<title>* with 3 highlights, linked to *<topic>*. Want me to
    pull out any of it as its own idea?"
 
@@ -130,7 +134,8 @@ Capture something {{OWNER}} read, watched, or listened to as a **source** page.
 
 1. Get the thought (args or ask). Keep it **atomic**: one idea per page, in {{OWNER}}'s own
    words.
-2. **Dedup** — if a near-identical note exists, append/refine it rather than duplicating.
+2. **Dedup** — if a near-identical note exists, append/refine it rather than duplicating; if
+   this idea *supersedes* an older one, archive the old note (see **Archival**).
 3. Write `"$VAULT_ROOT/ideas/<slug>.md"` from `templates/idea.md`. Set `source:` if
    it came from something saved.
 4. **Connect it.** Under `## Connects to`, link related ideas, topics, and sources — be
@@ -158,13 +163,33 @@ A topic page gathers everything on one subject. Create
 then keep its `## Notes` and `## Sources` lists current as you file related pages. Add the
 topic to its `index.md`/`log.md`; refresh search.
 
+## Archival — retire superseded knowledge, never delete
+
+**Nothing is ever deleted.** When a newer note or source supersedes or contradicts an existing
+page, *archive* the old page — retire it in place so its history and the links into it survive.
+
+To archive a page (never move or delete the file — that breaks inbound links):
+1. Add two keys to its frontmatter: `archived: <YYYY-MM-DD>` and
+   `archived_reason: "<one line — e.g. superseded by <link to the new page>>"`. Leave `type`
+   and the body intact.
+2. In the folder's `index.md`, move its bullet out of the active list into an `## Archived`
+   section (create it if missing): `<link to page> — <reason> (archived <date>)`.
+3. In the superseding page's `## Connects to` / `## Related`, link the archived page, so the
+   supersession trail is preserved.
+
+The page keeps its path — existing links still resolve and it stays searchable — but now
+carries the `archived` marker. **Fully reversible:** drop the two keys and move the index
+bullet back. Use this wiki's link style (relative or wikilink) for every link above.
+
 ## Operation: Query
 
 1. Search: `qmd query "<question>" -c "$QMD_COLLECTION" --format json -n 8 --full-path`
    (or grep fallback). Read the top pages in full via their `--full-path`.
-2. Answer in plain language, grounded in those pages, citing each with a link in this wiki's
+2. **Skip or de-prioritize pages whose frontmatter has `archived:`** — they're historical;
+   cite one only if specifically relevant, and mark it `(archived)`.
+3. Answer in plain language, grounded in those pages, citing each with a link in this wiki's
    link style. If results are thin, broaden the search or rephrase.
-3. If the answer is a keeper, offer to save it as an idea-note, then refresh search.
+4. If the answer is a keeper, offer to save it as an idea-note, then refresh search.
 
 ## Operation: Lint
 
@@ -175,8 +200,13 @@ Glob all `.md` under `"$VAULT_ROOT"` and check:
   notes that aren't connected to anything yet).
 - **Broken links**, **index drift** (pages not listed in their folder's `index.md`), and
   **search drift** (`qmd status` shows pending docs).
+- **Archived pages**: each should sit under an `## Archived` section in its `index.md` and
+  carry both `archived` and `archived_reason` keys.
 
-Present a short health report and offer to fix (connect orphans, add to index, refresh qmd).
+Present a short health report and offer to fix the *structural* issues (connect orphans, add
+to index, move archived bullets, refresh qmd). **Lint never archives, deletes, or rewrites
+content** — it reports superseded pages and points to `/{{WIKI_NAME}}` (Save/Note/Ingest),
+which handles archival under its confirmation-gated plan.
 
 ## Operation: Status / Reindex
 
@@ -195,4 +225,6 @@ Present a short health report and offer to fix (connect orphans, add to index, r
 - **Link generously.** More links, better recall. The graph between notes IS the second
   brain. A link to a page that doesn't exist yet is a useful TODO marker — create it later.
 - **Dedup before you create.** Search first; grow an existing page rather than duplicating.
+- **Never delete — archive.** When a note or source is superseded, retire the old page in
+  place (see Archival) so the trail survives and links don't break.
 - **Keep `index.md` and `log.md` current**, and **refresh qmd after every change.**
