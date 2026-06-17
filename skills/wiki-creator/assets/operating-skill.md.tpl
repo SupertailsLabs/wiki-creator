@@ -86,7 +86,7 @@ present) so the next search is current.
 
 | Invocation | Operation |
 |---|---|
-| `/{{WIKI_NAME}}` or `/{{WIKI_NAME}} ingest` | **Ingest** — distill the current conversation |
+| `/{{WIKI_NAME}}` or `/{{WIKI_NAME}} ingest` | **Ingest** — distill the conversation (and archive/refresh superseded pages) |
 | `/{{WIKI_NAME}} meeting [paste]` | **Meeting** — distill a meeting/transcript |
 | `/{{WIKI_NAME}} query <question>` | **Query** — search + answer |
 | `/{{WIKI_NAME}} person <name>` | **Person** — log a 1:1/conversation [ONLY IF people/] |
@@ -112,22 +112,28 @@ Distill a meeting or pasted transcript into a meeting note **plus** fanned-out b
    - `raw+distilled` → also append the full transcript inside the collapsible Raw transcript
      block at the bottom.
 4. **Fan out** the useful parts into the buckets — {{BUCKETS}}. For EACH item:
-   - **Dedup first** (qmd `search`/`vsearch`, or grep). If a page on the same thing exists,
-     UPDATE it (append a dated note) instead of creating a duplicate.
-   - Otherwise create the page from the matching template in `templates/`.
+   - **Dedup, then classify** (qmd `search`/`vsearch`, or grep). Decide: **NEW** (no match →
+     create), **UPDATE** (same topic, this *adds* to it → append an `## Update — <date>`
+     section and bump `timestamp`; this is also how a stale page gets refreshed), or
+     **ARCHIVE** (this *supersedes* the old page → archive the old one per **Archival** below
+     and create the replacement as NEW). Never duplicate; never silently delete.
+   - For a NEW page, create it from the matching template in `templates/`.
    - Set `source:` to a link back to this meeting, and `people:` to the participants involved.
    - **Results** must set `follows_up:` to the decision/actionable they are the outcome of —
      this closes the loop so you can trace decision → result.
 5. **Link the meeting note's sections** (`## Actionables`, `## Decisions`, `## Patterns`,
    `## Results`) to the pages you just wrote.
-6. **Update indexes & logs**: add each new page to its folder's `index.md`; append a dated
-   line to each touched `log.md` and to the root `log.md`.
+6. **Update indexes & logs**: add each new page to its folder's `index.md` (and move any
+   archived page's bullet to that index's `## Archived` section); append a dated line to each
+   touched `log.md` and the root `log.md`, recording UPDATEs and ARCHIVEs too (e.g.
+   `Archived: <slug> — superseded by <slug>`).
 7. **Refresh search**: `qmd update && qmd embed` (if qmd present).
 8. **Report** plainly: "Filed the founder sync — 2 actions, 1 decision, 1 pattern. Want me
    to do anything with them?"
 
-Keep friction low: show a 2–4 line preview of what you'll file, then proceed. Only stop to
-ask if something is genuinely ambiguous (e.g. who owns an action).
+Keep friction low: show a 2–4 line preview of what you'll file — **new / updated / archived**
+— then proceed. Only stop to ask if something is genuinely ambiguous (e.g. who owns an action,
+or whether an old page is truly superseded).
 
 ## Operation: Ingest (default)
 
@@ -147,13 +153,33 @@ just working notes (then fan out to buckets directly). Reuse steps 4–8 above.
    new open items under `## Open with them`.
 6. Update indexes/logs; refresh search.
 
+## Archival — retire superseded knowledge, never delete
+
+**Nothing is ever deleted.** When new material supersedes or contradicts an existing page,
+*archive* the old page — retire it in place so its history and the links into it survive.
+
+To archive a page (never move or delete the file — that breaks inbound links):
+1. Add two keys to its frontmatter: `archived: <YYYY-MM-DD>` and
+   `archived_reason: "<one line — e.g. superseded by <link to the new page>>"`. Leave `type`
+   and the body intact. (For a decision, also set `status: superseded`.)
+2. In the folder's `index.md`, move its bullet out of the active list into an `## Archived`
+   section (create it if missing): `<link to page> — <reason> (archived <date>)`.
+3. In the superseding page's `## Related`, link the archived page, so the supersession trail
+   is preserved.
+
+The page keeps its path — existing links still resolve and it stays searchable — but now
+carries the `archived` marker. **Fully reversible:** drop the two keys and move the index
+bullet back. Use this wiki's link style (relative or wikilink) for every link above.
+
 ## Operation: Query
 
 1. Search: `qmd query "<question>" -c "$QMD_COLLECTION" --format json -n 8 --full-path`
    (or grep fallback). Read the top pages in full via their `--full-path`.
-2. Answer in plain language, grounded in those pages, citing each with a link in this
+2. **Skip or de-prioritize pages whose frontmatter has `archived:`** — they're historical;
+   cite one only if specifically relevant, and mark it `(archived)`.
+3. Answer in plain language, grounded in those pages, citing each with a link in this
    wiki's link style. If results are thin, broaden the search or rephrase.
-3. If the answer is substantial and new, offer to save it as a page, then refresh search.
+4. If the answer is substantial and new, offer to save it as a page, then refresh search.
 
 ## Operation: Init
 
@@ -175,10 +201,14 @@ Glob all `.md` under `"$VAULT_ROOT"` and check:
 - **Index drift**: pages on disk not listed in their folder's `index.md`.
 - **Orphans**: pages with no inbound links.
 - **Stale**: pages whose `timestamp` is > 60 days old.
+- **Archived pages**: each should sit under an `## Archived` section in its `index.md` and
+  carry both `archived` and `archived_reason` keys.
 - **Search drift**: `qmd status` shows pending docs.
 
-Present a short health report and offer to fix (add to index, remove dead links,
-`qmd update && qmd embed`).
+Present a short health report and offer to fix the *structural* issues (add to index, move
+archived bullets, remove dead links, `qmd update && qmd embed`). **Lint never archives,
+deletes, or rewrites page content** — it reports stale/superseded pages and points to
+`/{{WIKI_NAME}}` (Meeting/Ingest), which handles archival under its confirmation-gated plan.
 
 ## Operation: Status / Reindex
 
@@ -193,6 +223,8 @@ Present a short health report and offer to fix (add to index, remove dead links,
 - **Do the filing; don't make the owner think about structure.** They describe what
   happened; you decide where it goes.
 - **Dedup before you create.** Search first; update an existing page rather than duplicating.
+- **Never delete — archive.** When something is superseded, retire the old page in place (see
+  Archival) so the trail survives and inbound links don't break.
 - **Capture the why.** A decision page without its reasoning is half a page.
 - **Link generously** — more links, better recall. A link to a page that doesn't exist yet
   is fine (it's a TODO marker); create it when the topic comes up.

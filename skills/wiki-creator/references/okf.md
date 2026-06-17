@@ -37,6 +37,9 @@ Source spec: <https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main
 - `source` — link back to the raw material this was distilled from (e.g. a meeting)
 - `people` — list of links to participants/owners
 - `status` — lifecycle (`proposed`/`accepted`/`superseded`, `open`/`done`, …)
+- `archived` / `archived_reason` — when a page is superseded it is *retired in place* (not
+  deleted): an archive date plus a one-line reason. The page keeps its path so links still
+  resolve; it stays searchable but is treated as historical. See `references/archival.md`.
 
 Producers MAY add any other keys; consumers MUST preserve unknown keys. So our richer
 fields never break OKF compatibility, and a future tool that only understands `type`

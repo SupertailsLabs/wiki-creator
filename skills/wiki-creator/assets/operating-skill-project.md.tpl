@@ -93,7 +93,7 @@ present) so the next search is current.
 
 | Invocation | Operation |
 |---|---|
-| `/{{WIKI_NAME}}` or `/{{WIKI_NAME}} ingest` | **Ingest** — distill the current conversation |
+| `/{{WIKI_NAME}}` or `/{{WIKI_NAME}} ingest` | **Ingest** — distill the conversation (and archive/refresh superseded pages) |
 | `/{{WIKI_NAME}} log [paste]` | **Log** — distill a session / meeting / update |
 | `/{{WIKI_NAME}} query <question>` | **Query** — search + answer |
 | `/{{WIKI_NAME}} milestone <name>` | **Milestone** — add/update a milestone [ONLY IF milestones/] |
@@ -112,9 +112,12 @@ buckets.
    "What happened? Paste notes, or just tell me." [IF milestones/]Note which milestone it relates to,
    if any.[/IF]
 2. **Fan out** the useful parts into the buckets — {{BUCKETS}}. For EACH item:
-   - **Dedup first** (qmd `search`/`vsearch`, or grep). If a page on the same thing exists,
-     UPDATE it (append a dated note) instead of creating a duplicate.
-   - Otherwise create the page from the matching template (`decisions/`, `tasks/`,
+   - **Dedup, then classify** (qmd `search`/`vsearch`, or grep): **NEW** (no match → create),
+     **UPDATE** (same topic, this *adds* to it → append an `## Update — <date>` section and
+     bump `timestamp`), or **ARCHIVE** (this *supersedes* the old page — e.g. a reversed
+     decision or dead approach → archive it per **Archival** below and create the replacement
+     as NEW). Never duplicate; never silently delete.
+   - For a NEW page, create it from the matching template (`decisions/`, `tasks/`,
      `patterns/`, `learnings/`, `concepts/`, `references/`[IF milestones/], `milestones/`[/IF]).
    - Set `source:` to where it came from (the session/meeting, or a link to the overview).
    - **Decisions** capture what was chosen **and why** — a decision without its reasoning is
@@ -122,28 +125,52 @@ buckets.
 3. **Keep the overview current.** Update `overview.md`: add notable decisions under
    `## Key decisions`, open work under `## Open actionables`, and refresh `## Status` if the
    project moved.
-4. **Update indexes & logs**: add each new page to its folder's `index.md`; append a dated
-   line to each touched `log.md` and the root `log.md`.
+4. **Update indexes & logs**: add each new page to its folder's `index.md` (move any archived
+   page's bullet to that index's `## Archived` section); append a dated line to each touched
+   `log.md` and the root `log.md`, recording UPDATEs and ARCHIVEs (e.g. `Archived: <slug> —
+   superseded by <slug>`).
 5. **Refresh search**: `qmd update && qmd embed` (if qmd present).
 6. **Report** plainly: "Logged it — 1 decision, 2 tasks, 1 learning, and bumped the overview
    status. Anything else?"
 
-Keep friction low: show a 2–4 line preview of what you'll file, then proceed. Only stop to
-ask if something is genuinely ambiguous.
+Keep friction low: show a 2–4 line preview of what you'll file — **new / updated / archived**
+— then proceed. Only stop to ask if something is genuinely ambiguous (including whether an old
+page is truly superseded).
 
 ## Operation: Ingest (default)
 
 Same as Log, but the source is the **current conversation** rather than a pasted update.
 Reuse steps 2–6 above.
 
+## Archival — retire superseded knowledge, never delete
+
+**Nothing is ever deleted.** When new material supersedes or contradicts an existing page
+(a reversed decision, a dead approach), *archive* the old page — retire it in place so the
+project's history and the links into it survive.
+
+To archive a page (never move or delete the file — that breaks inbound links):
+1. Add two keys to its frontmatter: `archived: <YYYY-MM-DD>` and
+   `archived_reason: "<one line — e.g. superseded by <link to the new page>>"`. Leave `type`
+   and the body intact. (For a decision, also set `status: superseded`.)
+2. In the folder's `index.md`, move its bullet out of the active list into an `## Archived`
+   section (create it if missing): `<link to page> — <reason> (archived <date>)`.
+3. In the superseding page's `## Related`, link the archived page, so the supersession trail
+   is preserved.
+
+The page keeps its path — existing links still resolve and it stays searchable — but now
+carries the `archived` marker. **Fully reversible:** drop the two keys and move the index
+bullet back. Use this wiki's link style (relative or wikilink) for every link above.
+
 ## Operation: Query
 
 1. Search: `qmd query "<question>" -c "$QMD_COLLECTION" --format json -n 8 --full-path`
    (or grep fallback). Read the top pages in full via their `--full-path`. The overview is a
    good first stop for "where does the project stand?" questions.
-2. Answer in plain language, grounded in those pages, citing each with a link in this wiki's
+2. **Skip or de-prioritize pages whose frontmatter has `archived:`** — they're historical;
+   cite one only if specifically relevant, and mark it `(archived)`.
+3. Answer in plain language, grounded in those pages, citing each with a link in this wiki's
    link style. If results are thin, broaden the search or rephrase.
-3. If the answer is substantial and new, offer to save it (usually a learning or a decision),
+4. If the answer is substantial and new, offer to save it (usually a learning or a decision),
    then refresh search.
 
 ## Operation: Milestone [ONLY IF milestones/]
@@ -165,8 +192,13 @@ Glob all `.md` under `"$VAULT_ROOT"` and check:
 - **Overview drift**: decisions/tasks on disk that the overview doesn't reference yet.
 - **Broken links**, **index drift** (pages not listed in their folder's `index.md`),
   **stale** open tasks (`timestamp` > 30 days), and **search drift** (`qmd status`).
+- **Archived pages**: each should sit under an `## Archived` section in its `index.md` and
+  carry both `archived` and `archived_reason` keys.
 
-Present a short health report and offer to fix (update the overview, add to index, refresh qmd).
+Present a short health report and offer to fix the *structural* issues (update the overview,
+add to index, move archived bullets, refresh qmd). **Lint never archives, deletes, or rewrites
+content** — it reports stale/superseded pages and points to `/{{WIKI_NAME}}` (Log/Ingest),
+which handles archival under its confirmation-gated plan.
 
 ## Operation: Status / Reindex
 
@@ -182,6 +214,8 @@ Present a short health report and offer to fix (update the overview, add to inde
 - **Capture the why.** Decisions and learnings are the project's memory; record the reasoning,
   not just the outcome.
 - **Dedup before you create.** Search first; update an existing page rather than duplicating.
+- **Never delete — archive.** A reversed decision or dead approach is retired in place (see
+  Archival), not removed — the project's history is part of its value.
 - **Link generously** — every page should point back to where it came from. A link to a page
   that doesn't exist yet is a fine TODO marker.
 - **Keep `index.md` and `log.md` current**, and **refresh qmd after every change.**

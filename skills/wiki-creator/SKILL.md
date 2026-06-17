@@ -47,6 +47,7 @@ on proposing a structure they recognize as *theirs*.
 | [`references/archetypes.md`](references/archetypes.md) | proposing a structure (6 ready trees: 4 work + second-brain + single-project) |
 | [`references/okf.md`](references/okf.md) | you need the exact conformance rules |
 | [`references/qmd.md`](references/qmd.md) | wiring up or explaining search |
+| [`references/archival.md`](references/archival.md) | the never-delete archival/updation model every generated skill inlines |
 
 ## Build pipeline
 
@@ -117,6 +118,8 @@ Pick the operating-skill template that matches `mode`, fill it, and write the re
 - Resolve the `[IF …]` / `[ONLY IF …]` blocks: keep a block only if the wiki has that feature
   (drop Person if no `people/`, Journal if no `journal/`, Milestone if no `milestones/`, …),
   and delete the marker comments and the leading GENERATOR NOTES comment.
+- **Keep the `Archival` section and the new/update/archive classification** in the capture
+  op — they apply to every wiki (knowledge is never deleted; see `references/archival.md`).
 - If folder names in the template prose don't match the user's words, swap them.
 - Copy the note templates the wiki uses so the skill's `templates/<type>.md` references
   resolve (copy each and drop the `.tpl`). By mode, typically:
@@ -161,5 +164,8 @@ usually meant to be committed with the code).
 - **Their words win.** Folders and type labels use the nouns they actually use.
 - **Portable by default.** Relative links + OKF mean the wiki outlives any single app. Only
   choose Obsidian wikilinks for someone who lives entirely in Obsidian.
+- **Knowledge is never deleted.** Generated skills *update* pages in place and *archive*
+  superseded ones (retire-in-place, reversible) rather than deleting — the model is built into
+  all three operating-skill templates; see `references/archival.md`.
 - **The generated skill is self-contained.** After generation, the user's wiki is operated
   entirely by `/<wiki-name>` — this generator's job is done.
