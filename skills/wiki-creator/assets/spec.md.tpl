@@ -53,6 +53,15 @@ better. Unknown fields are always preserved.
 
 {{FLOW_DESC}}
 
+## Archiving — nothing is deleted
+
+When a page is superseded by newer knowledge, it is **archived, not deleted**. The page keeps
+its file and path (so existing links still resolve), gains `archived: <date>` and
+`archived_reason:` in its frontmatter, and its bullet in `index.md` moves to an `## Archived`
+section. Archived pages stay searchable but are treated as historical (de-prioritized in
+answers). Archiving is fully reversible, and the `{{WIKI_NAME}}` skill does it for you when
+something gets replaced — so the wiki's history is never lost.
+
 ## Naming & dates
 
 - Filenames: lowercase, hyphen-separated, no spaces (e.g. `q3-pricing.md`).
